@@ -2,9 +2,9 @@
 
 COVERAGE_REPORT_DIR="${COVERAGE_REPORT_DIR:-htmlcov}"
 
-python -m coverage run --branch -m unittest discover
+python3.12 -m coverage run --branch -m unittest discover
 test_result=$?
 
-python -m coverage html --skip-empty -d "${COVERAGE_REPORT_DIR}"
+python3.12 -m coverage html --skip-empty -d "${COVERAGE_REPORT_DIR}"
 
 exit "${test_result}"

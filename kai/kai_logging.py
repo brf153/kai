@@ -10,6 +10,21 @@ formatter = logging.Formatter(
     "%(levelname)s - %(asctime)s - %(name)s - [%(filename)20s:%(lineno)-4s - %(funcName)20s()] - %(message)s"
 )
 
+## change here
+import os
+
+# def process_log_dir_replacements(log_dir: str) -> str:
+#     """
+#     Replaces '$pwd' in the log_dir with the path to the Kai project directory,
+#     which is one level up from the current working directory.
+#     """
+#     if log_dir.startswith("$pwd"):
+#         current_directory = os.getcwd()
+#         kai_project_directory = os.path.abspath(os.path.join(current_directory, ".."))
+#         log_dir = log_dir.replace("$pwd", kai_project_directory, 1)
+#         log_dir = os.path.normpath(log_dir)
+#     return log_dir
+
 
 def process_log_dir_replacements(log_dir: str):
     ##
@@ -21,7 +36,6 @@ def process_log_dir_replacements(log_dir: str):
             "$pwd", os.path.join(os.path.dirname(os.path.realpath(__file__)), "../")
         )
     return log_dir
-
 
 def setup_console_handler(logger, log_level: str = "INFO"):
     console_handler = logging.StreamHandler()
