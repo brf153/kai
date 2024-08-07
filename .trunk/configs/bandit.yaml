@@ -1,5 +1,0 @@
-assert_used:
-  skips:
-    - "*/kai-service/tests/**.py"
-    - "**/test_*.py"
-    - "**/*_test.py"
