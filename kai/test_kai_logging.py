@@ -98,7 +98,7 @@ class TestLoggingSetup(unittest.TestCase):
         initLoggingFromConfig(self.config)
 
         mock_makedirs.assert_called_once_with(expected_log_dir, exist_ok=True)
-        
+
         logger = logging.getLogger("kai")
         self.assertEqual(logger.level, logging.DEBUG)
         self.assertTrue(
