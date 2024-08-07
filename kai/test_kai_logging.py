@@ -40,16 +40,10 @@ class TestLoggingSetup(unittest.TestCase):
 
     @patch("os.getcwd")
     def test_process_log_dir_replacements(self, mock_getcwd):
-        mock_getcwd.return_value = "/home/k8smaster/Desktop/kai/kai"
-        print(f"Mocked getcwd: {mock_getcwd.return_value}")
-        print(f"Original log_dir: {self.config.log_dir}")
-
+        mock_cwd = os.path.dirname(os.path.abspath(__file__))
+        mock_getcwd.return_value = mock_cwd
         actual_log_dir = process_log_dir_replacements(self.config.log_dir)
-
-        print(f"Processed log_dir: {actual_log_dir}")
-        expected_log_dir = "/home/k8smaster/Desktop/kai/logs"
-        print(f"Expected log_dir: {expected_log_dir}")
-
+        expected_log_dir = os.path.abspath(os.path.join(mock_cwd, "logs"))
         self.assertEqual(expected_log_dir, actual_log_dir)
 
     @patch("logging.StreamHandler")
@@ -62,14 +56,16 @@ class TestLoggingSetup(unittest.TestCase):
         handler_instance.setFormatter.assert_called_once()
 
     @patch("logging.FileHandler")
-    def test_setup_file_handler(self, mock_file_handler):
+    @patch("os.makedirs")
+    def test_setup_file_handler(self, mock_makedirs, mock_file_handler):
         logger = logging.getLogger("test_file_logger")
         setup_file_handler(
-            logger, self.log_file, self.test_log_dir, self.file_log_level
+            logger, self.log_file, self.log_dir_with_placeholder, self.file_log_level
         )
-        mock_file_handler.assert_called_once_with(
-            os.path.join(self.test_log_dir, self.log_file)
-        )
+        expected_log_dir = process_log_dir_replacements(self.log_dir_with_placeholder)
+        mock_makedirs.assert_called_once_with(expected_log_dir, exist_ok=True)
+        expected_log_file_path = os.path.join(expected_log_dir, self.log_file)
+        mock_file_handler.assert_called_once_with(expected_log_file_path)
         handler_instance = mock_file_handler.return_value
         handler_instance.setLevel.assert_called_once_with(self.file_log_level)
         handler_instance.setFormatter.assert_called_once()
@@ -94,16 +90,15 @@ class TestLoggingSetup(unittest.TestCase):
         )
 
     @patch("os.makedirs")
-    @patch("os.path.dirname")
-    @patch("os.path.realpath")
-    def test_init_logging_from_config(self, mock_realpath, mock_dirname, mock_makedirs):
-        mock_realpath.return_value = "/home/k8smaster/Desktop/kai/kai"
-        mock_dirname.return_value = "/home/k8smaster/Desktop/kai"
-        expected_log_dir = "/home/k8smaster/Desktop/kai/logs"
-
+    @patch("os.getcwd")
+    def test_init_logging_from_config(self, mock_getcwd, mock_makedirs):
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        mock_getcwd.return_value = base_dir
+        expected_log_dir = os.path.join(base_dir, "logs")
         initLoggingFromConfig(self.config)
 
         mock_makedirs.assert_called_once_with(expected_log_dir, exist_ok=True)
+        
         logger = logging.getLogger("kai")
         self.assertEqual(logger.level, logging.DEBUG)
         self.assertTrue(
