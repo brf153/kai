@@ -14,13 +14,13 @@ formatter = logging.Formatter(
 
 
 def process_log_dir_replacements(log_dir: str) -> str:
-    """
-    Replaces '$pwd' in the log_dir with the path to the Kai project directory,
-    which is one level up from the current working directory.
-    """
+    ##
+    # We want to replace $pwd with the location of the Kai project directory,
+    # this is needed to help with specifying from configuration
+    ##
     if log_dir.startswith("$pwd"):
         current_directory = os.getcwd()
-        kai_project_directory = os.path.abspath(os.path.join(current_directory, ".."))
+        kai_project_directory = os.path.abspath(current_directory)
         log_dir = log_dir.replace("$pwd", kai_project_directory, 1)
         log_dir = os.path.normpath(log_dir)
     return log_dir
